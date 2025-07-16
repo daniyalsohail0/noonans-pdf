@@ -1,0 +1,59 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  width: 400px;
+  height: 300px;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  text-align: center;
+  padding: 20px;
+  margin: 20px;
+  background: #fff;
+}
+
+.drop-zone {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.upload-link {
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.actions {
+  margin-top: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+.btn {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn.danger {
+  background: #dc3545;
+}
