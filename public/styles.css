@@ -1,59 +1,306 @@
+/* Base styles */
 body {
   font-family: Arial, sans-serif;
-  background: #f9f9f9;
+  background-color: #f3f4f6;
+  margin: 40px 0px;
+  padding: 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-}
-
-.container {
-  width: 400px;
-  height: 300px;
-  border: 2px dashed #ccc;
-  border-radius: 12px;
-  text-align: center;
-  padding: 20px;
-  margin: 20px;
-  background: #fff;
-}
-
-.drop-zone {
   height: 100%;
+  max-height: 100vh;
+}
+
+/* Form container */
+.form-container {
+  background: #ffffff;
+  padding: 24px;
+  margin: 20px;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  color: #888;
-  font-size: 16px;
+  gap: 20px;
+}
+
+/* Form groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+input[type="text"],
+textarea {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: inherit;
+  outline: none;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Dropzone */
+.drop-container {
+  position: relative;
+  padding: 24px;
+  border: 2px dashed #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  text-align: center;
+  color: #6b7280;
   cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.drop-container:hover {
+  border-color: #3b82f6;
 }
 
 .upload-link {
-  color: #007bff;
-  cursor: pointer;
+  color: #2563eb;
   text-decoration: underline;
+  cursor: pointer;
 }
 
-.actions {
-  margin-top: 10px;
+/* Hide actual file input */
+.file-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 
-.hidden {
-  display: none;
-}
-
-.btn {
-  margin: 5px;
-  padding: 8px 12px;
-  border: none;
-  background: #007bff;
+/* Submit button */
+.submit-btn {
+  padding: 10px;
+  background-color: #0ea5e9;
   color: white;
+  font-weight: bold;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease-in-out;
 }
 
-.btn.danger {
-  background: #dc3545;
+.submit-btn:hover {
+  background-color: #0284c7;
+}
+
+/* Error text */
+.error-text {
+  color: #dc2626;
+  margin-top: 1rem;
+  font-size: 14px;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 24px;
+}
+
+.action-btn {
+  width: 100%; /* Add this */
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: white;
+}
+
+.action-btn.primary {
+  background-color: #2563eb;
+}
+
+.action-btn.primary:hover {
+  background-color: #1d4ed8;
+}
+
+.action-btn.secondary {
+  background-color: #3b82f6;
+}
+
+.action-btn.secondary:hover {
+  background-color: #2563eb;
+}
+
+.action-btn.danger {
+  background-color: #ef4444;
+}
+
+.action-btn.danger:hover {
+  background-color: #dc2626;
+}
+
+/* Utility */
+.hidden {
+  display: none !important;
+}
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#caution p {
+  font-size: 0.9rem;
+  color: #b32727;
+  background: #fff3cd;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+/* File info - HIDDEN BY DEFAULT */
+#file-info {
+  width: 100%;
+  max-width: 400px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 1rem 1.25rem;
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 14px;
+  color: #374151;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+}
+
+#file-info .title,
+#file-info .description,
+#file-info .date-posted {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.4;
+}
+
+#file-info .title::before {
+  content: "📄";
+  font-size: 16px;
+}
+
+#file-info .description::before {
+  content: "📝";
+  font-size: 16px;
+}
+
+#file-info .date-posted::before {
+  content: "⏱️";
+  font-size: 16px;
+}
+
+/* Actions container - HIDDEN BY DEFAULT */
+#actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 400px;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.action-btn {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: white;
+}
+
+.action-btn.primary {
+  background-color: #2563eb;
+}
+
+.action-btn.primary:hover {
+  background-color: #1d4ed8;
+}
+
+.action-btn.secondary {
+  background-color: #3b82f6;
+}
+
+.action-btn.secondary:hover {
+  background-color: #2563eb;
+}
+
+.action-btn.danger {
+  background-color: #ef4444;
+}
+
+.action-btn.danger:hover {
+  background-color: #dc2626;
+}
+
+.action-btn::before {
+  font-size: 16px;
+}
+
+#view-s3::before {
+  content: "🔗";
+}
+
+#view-issuu::before {
+  content: "📖";
+}
+
+#delete-both::before {
+  content: "🗑️";
 }

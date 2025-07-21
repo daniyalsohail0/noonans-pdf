@@ -6,30 +6,68 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="container">
-      <div id="drop-zone" class="drop-zone">
+    <!-- Form Container -->
+    <form id="upload-form" class="form-container">
+      <!-- Title Input -->
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input id="title" name="title" type="text" required />
+      </div>
+
+      <!-- Description Input -->
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          name="description"
+          required
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- File Drop Zone -->
+      <div class="drop-container" id="drop-zone">
         <p>
-          Drop the Catalogue PDF here<br />or
-          <span class="upload-link">click to upload</span>
+          Drop the Catalogue PDF here<br />
+          or <span class="upload-link">click to upload</span>
         </p>
+        <input
+          type="file"
+          id="file-input"
+          accept="application/pdf"
+          name="pdf"
+          required
+          class="file-input"
+        />
       </div>
 
-      <input
-        type="file"
-        id="file-input"
-        accept="application/pdf"
-        style="display: none"
-      />
+      <button id="submit-btn" type="submit" class="submit-btn">
+        <span class="btn-text">Submit</span>
+        <span class="spinner hidden"></span>
+      </button>
+    </form>
 
-      <div id="actions" class="actions hidden">
-        <button id="view-s3" class="btn">View PDF in S3</button>
-        <button id="view-issuu" class="btn">View in Issuu</button>
-        <button id="delete-both" class="btn danger">Delete Both</button>
-      </div>
+    <div id="caution"></div>
+
+    <!-- Error Display -->
+    <div id="error-boundary" class="error-text"></div>
+
+    <!-- File Info - Hidden by default -->
+    <div id="file-info" class="file-info hidden">
+      <div class="title"></div>
+      <div class="description"></div>
+      <div class="date-posted"></div>
     </div>
 
-    <div id="error-boundary" class="error"></div>
+    <!-- Action Buttons - Hidden by default -->
+    <div id="actions" class="hidden">
+      <button id="view-s3" class="action-btn primary">View PDF in S3</button>
+      <button id="view-issuu" class="action-btn secondary">
+        View in Issuu
+      </button>
+      <button id="delete-both" class="action-btn danger">Delete Both</button>
+    </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>

@@ -1,40 +1,30 @@
-const fs = require("fs");
 const dotenv = require("dotenv");
-const path = require("path");
 
 dotenv.config();
 
 async function uploadIssuu(req, res) {
-  const pdfPath = req.file?.path;
-  const { title, description, s3Url } = req.body;
+  const { title, description, s3Url, fileSize } = req.body;
 
-  console.log("Input:", title, description, s3Url);
+  console.log("Input:", title, description, s3Url, fileSize);
 
-  if (!pdfPath) {
-    return res.status(400).json({ success: false, error: "Missing file" });
-  }
-
-  if (!s3Url || typeof s3Url !== "string" || !s3Url.startsWith("http")) {
+  // Validate required fields
+  if (!title || !description || !s3Url || !fileSize) {
     return res
       .status(400)
-      .json({ success: false, error: "Invalid or missing s3Url" });
+      .json({ success: false, error: "Missing required fields" });
   }
 
-  let fileSizeInBytes;
-  try {
-    const stats = await fs.promises.stat(pdfPath);
-    fileSizeInBytes = stats.size;
-    console.log("File size in bytes:", fileSizeInBytes);
-  } catch (err) {
-    console.error("Failed to get file size", err);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to get file size" });
+  if (typeof s3Url !== "string" || !s3Url.startsWith("http")) {
+    return res.status(400).json({ success: false, error: "Invalid s3Url" });
+  }
+
+  if (isNaN(Number(fileSize))) {
+    return res.status(400).json({ success: false, error: "Invalid fileSize" });
   }
 
   try {
-    // Create draft
-    const draftResponse = await fetch(`https://api.issuu.com/v2/drafts`, {
+    // Create draft on Issuu
+    const draftResponse = await fetch("https://api.issuu.com/v2/drafts", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -45,7 +35,7 @@ async function uploadIssuu(req, res) {
         fileUrl: s3Url,
         info: {
           file: 0,
-          access: "PRIVATE",
+          access: "PUBLIC",
           title,
           description,
           preview: false,
@@ -62,15 +52,26 @@ async function uploadIssuu(req, res) {
     }
 
     const draftResult = await draftResponse.json();
-    console.log("Draft creation response:", draftResult);
 
     const slug = draftResult.slug;
     if (!slug) {
       throw new Error("Draft slug not returned from Issuu");
     }
 
-    // Wait 5 seconds before publishing the draft
-    await new Promise((resolve) => setTimeout(resolve, fileSizeInBytes));
+    // Calculate wait time: min 50 seconds, max 8 minutes (480 seconds)
+    const fileSizeMB = fileSize / (1024 * 1024); // Convert bytes to MB
+    const calculatedWaitTime = Math.round(fileSizeMB * 30); // 60 seconds per MB
+    const waitTimeSeconds = Math.max(30, Math.min(480, calculatedWaitTime)); // min 50s, max 8min
+
+    console.log(
+      `File size: ${fileSizeMB.toFixed(
+        2
+      )} MB, waiting ${waitTimeSeconds} seconds (${(
+        waitTimeSeconds / 60
+      ).toFixed(1)} minutes)`
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, waitTimeSeconds * 1000));
 
     // Publish draft
     const publishResponse = await fetch(
@@ -90,14 +91,8 @@ async function uploadIssuu(req, res) {
     }
 
     const publishResult = await publishResponse.json();
-    console.log("Publish response:", publishResult);
 
-    // Clean up temp file on success
-    if (pdfPath && fs.existsSync(pdfPath)) {
-      fs.unlinkSync(pdfPath);
-    }
-
-    // Respond with success and useful info
+    // Success
     res.status(201).json({
       success: true,
       draftSlug: slug,
@@ -105,12 +100,6 @@ async function uploadIssuu(req, res) {
     });
   } catch (error) {
     console.error("❌ Upload to Issuu failed:", error);
-
-    // Clean up on error
-    if (pdfPath && fs.existsSync(pdfPath)) {
-      fs.unlinkSync(pdfPath);
-    }
-
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : String(error),

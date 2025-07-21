@@ -6,7 +6,6 @@ const s3 = require("./s3-client");
 
 dotenv.config();
 
-
 async function generateSignedURL(filename) {
   const command = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME,
@@ -20,7 +19,7 @@ async function generateSignedURL(filename) {
 const uploadToS3 = async (req, res) => {
   try {
     const file = req.file;
-    const requestedFilename = req.body.filename; // ✅ Use sanitized name from client
+    const requestedFilename = req.body.filename;
 
     if (!file || !requestedFilename) {
       return res.status(400).json({ error: "Missing file or filename" });

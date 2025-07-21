@@ -22,11 +22,17 @@ async function checkIssuu(req, res) {
       throw new Error("Unable to find publication");
     }
 
-    console.log(result.publicLocation);
+    console.log(result);
 
-    res
-      .status(200)
-      .json({ success: true, data: { url: result.publicLocation } });
+    res.status(200).json({
+      success: true,
+      data: {
+        url: result.publicLocation,
+        title: result.title,
+        description: result.description,
+        createdAt: result.created,
+      },
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, error: error });
