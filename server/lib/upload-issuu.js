@@ -5,8 +5,6 @@ dotenv.config();
 async function uploadIssuu(req, res) {
   const { title, description, s3Url, fileSize } = req.body;
 
-  console.log("Input:", title, description, s3Url, fileSize);
-
   // Validate required fields
   if (!title || !description || !s3Url || !fileSize) {
     return res
@@ -54,24 +52,38 @@ async function uploadIssuu(req, res) {
     const draftResult = await draftResponse.json();
 
     const slug = draftResult.slug;
+
     if (!slug) {
       throw new Error("Draft slug not returned from Issuu");
     }
 
-    // Calculate wait time: min 50 seconds, max 8 minutes (480 seconds)
-    const fileSizeMB = fileSize / (1024 * 1024); // Convert bytes to MB
-    const calculatedWaitTime = Math.round(fileSizeMB * 30); // 60 seconds per MB
-    const waitTimeSeconds = Math.max(30, Math.min(480, calculatedWaitTime)); // min 50s, max 8min
+    let validation = true;
 
-    console.log(
-      `File size: ${fileSizeMB.toFixed(
-        2
-      )} MB, waiting ${waitTimeSeconds} seconds (${(
-        waitTimeSeconds / 60
-      ).toFixed(1)} minutes)`
-    );
+    while (validation) {
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+     
+      const validateConversion = await fetch(
+        `https://api.issuu.com/v2/drafts/${slug}`,
+        {
+          method: "GET",
+          headers: { Authorization: `Bearer ${process.env.ISSUU_TOKEN}` },
+        }
+      );
 
-    await new Promise((resolve) => setTimeout(resolve, waitTimeSeconds * 1000));
+      const resultValidate = await validateConversion.json();
+
+      if (!validateConversion.ok) {
+        throw new Error(resultValidate.message);
+      }
+
+      console.log(resultValidate);
+
+      if (resultValidate.fileInfo.conversionStatus === "DONE") {
+        validation = false;
+        break;
+      }
+
+    }
 
     // Publish draft
     const publishResponse = await fetch(

@@ -2,11 +2,14 @@ export const getElement = (id) => document.getElementById(id);
 
 export const showError = (msg) => {
   const error = getElement("error-boundary");
+  error.classList.remove("hidden");
   error.innerHTML = `<p>❌ ${msg}</p>`;
 };
 
 export const clearError = () => {
-  getElement("error-boundary").innerHTML = "";
+  const error = getElement("error-boundary");
+  error.innerHTML = "";
+  error.classList.add("hidden");
 };
 
 export function setupDropZoneEvents() {
