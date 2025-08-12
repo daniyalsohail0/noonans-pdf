@@ -6,26 +6,8 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <!-- Form Container -->
+    <!-- Upload PDF -->
     <form id="upload-form" class="form-container">
-      <!-- Title Input -->
-      <div class="form-group">
-        <label for="title">Title</label>
-        <input id="title" name="title" type="text" required />
-      </div>
-
-      <!-- Description Input -->
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          required
-          rows="3"
-        ></textarea>
-      </div>
-
-      <!-- File Drop Zone -->
       <div class="drop-container" id="drop-zone">
         <p>
           Drop the Catalogue PDF here<br />
@@ -68,6 +50,6 @@
       <button id="delete-both" class="action-btn danger">Delete Both</button>
     </div>
 
-    <script type="module" src="js/main.js"></script>
+    <script src="app.js"></script>
   </body>
 </html>
