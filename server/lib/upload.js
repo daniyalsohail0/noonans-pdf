@@ -53,7 +53,7 @@ async function uploadToS3(file, filename, downloadFilename) {
     );
   }
 
-  return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`;
+  return `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.AWS_BUCKET_NAME}/${filename}`;
 }
 
 async function uploadToIssuu(title, description, s3Url, fileSize) {
