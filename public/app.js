@@ -120,12 +120,17 @@ async function handleSubmit(e) {
   try {
     // Calculate estimated wait time
     const fileSizeMB = state.selectedFile.size / (1024 * 1024);
-    const waitTimeSeconds = Math.max(30, Math.min(480, Math.round(fileSizeMB * 60)));
+    const waitTimeSeconds = Math.max(
+      30,
+      Math.min(480, Math.round(fileSizeMB * 60))
+    );
 
     caution.innerHTML = `
       <p>
         ⏳ Uploading to S3 and Issuu. This may take a while as Issuu converts the document.<br />
-        <strong>Estimated Time:</strong> ${waitTimeSeconds} seconds (${Math.round(waitTimeSeconds / 60)} minutes)
+        <strong>Estimated Time:</strong> ${waitTimeSeconds} seconds (${Math.round(
+      waitTimeSeconds / 60
+    )} minutes)
       </p>
     `;
 
@@ -136,23 +141,30 @@ async function handleSubmit(e) {
     // Build query string with parameters
     const uploadParams = new URLSearchParams({
       auction_id: auctionId,
-      's3.download_filename': s3DownloadFilename,
-      'issuu.title': issuuTitle,
-      'issuu.description': issuuDescription
+      "s3.download_filename": s3DownloadFilename,
+      "issuu.title": issuuTitle,
+      "issuu.description": issuuDescription,
     });
 
     // Upload to both S3 and Issuu
-    const response = await fetch(`http://localhost:8000/api/upload?${uploadParams}`, {
-      method: "POST",
-      body: formData,
-    });
+    const response = await fetch(
+      `http://localhost:8000/api/upload?${uploadParams}`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
     const result = await response.json();
+
+    console.log(result);
 
     if (!response.ok || !result.success) {
       if (response.status === 409) {
         // File already exists - show specific error
-        throw new Error(result.error || "A file with this title already exists");
+        throw new Error(
+          result.error || "A file with this title already exists"
+        );
       }
       throw new Error(result.error || "Upload failed");
     }
@@ -197,13 +209,15 @@ async function checkExistingPDF() {
     buttons.classList.add("hidden");
   };
 
+  console.log(params.toString());
+
   const showInfo = () => {
     form.classList.add("hidden");
     infoSection.classList.remove("hidden");
     buttons.classList.remove("hidden");
   };
 
-  if (!auctionId || !issuuSlug) {
+  if (!auctionId) {
     showForm();
     return;
   }
@@ -216,16 +230,81 @@ async function checkExistingPDF() {
       )}&issuu.slug=${encodeURIComponent(issuuSlug)}`
     );
 
+    const result = await response.json();
+
+    console.log(result);
+
     if (!response.ok) {
       showError("Failed to validate files");
       showForm();
       return;
     }
 
-    const result = await response.json();
+    console.log(result.data.s3.exists);
 
-    if (!result.success || !result.data.s3?.exists || !result.data.issuu?.exists) {
-      showError("PDF not found in S3 or Issuu");
+    if (result.data.s3.exists && !result.data.issuu.exists) {
+      console.log("S3 exists, Issuu doesn't");
+
+      // 1. Create the container div
+      const warningDiv = document.createElement("div");
+      warningDiv.classList.add("warning-box");
+      warningDiv.style.padding = "10px";
+      warningDiv.style.margin = "10px 0";
+      warningDiv.style.border = "1px solid red";
+      warningDiv.style.background = "#ffe6e6";
+
+      // 2. Add the message
+      const msg = document.createElement("p");
+      msg.textContent = `A file with auction_id "${auctionId}" already exists in S3.`;
+      warningDiv.appendChild(msg);
+
+      // 3. Add a delete button
+      const btn = document.createElement("button");
+      btn.textContent = "Delete from S3";
+      btn.style.background = "red";
+      btn.style.color = "white";
+      btn.style.padding = "5px 10px";
+      btn.style.border = "none";
+      btn.style.cursor = "pointer";
+      btn.style.borderRadius = "4px";
+
+      btn.onclick = async () => {
+        try {
+          console.log(auctionId);
+          const res = await fetch("http://localhost:8000/api/delete-s3", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ auction_id: auctionId }),
+          });
+
+          const result = await res.json();
+
+          console.log(result);
+
+          if (res.ok) {
+            alert("File deleted from S3 successfully.");
+            warningDiv.remove(); // remove the warning div from DOM
+            window.location.reload();
+          } else {
+            alert("Failed to delete file from S3.");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Error deleting file from S3.");
+        }
+      };
+
+      warningDiv.appendChild(btn);
+
+      document.body.appendChild(warningDiv);
+    }
+
+    if (
+      !result.success ||
+      !result.data.s3?.exists ||
+      !result.data.issuu?.exists
+    ) {
+      showError("PDF not found in Issuu");
       showForm();
       return;
     }
@@ -241,12 +320,14 @@ async function checkExistingPDF() {
     showInfo();
 
     // Populate details
-    infoSection.querySelector(".title").textContent = result.data.issuu.title || state.filename.replace('.pdf', '');
+    infoSection.querySelector(".title").textContent =
+      result.data.issuu.title || state.filename.replace(".pdf", "");
     infoSection.querySelector(".description").textContent =
       result.data.issuu.description || `File: ${state.filename}`;
     const date = new Date(result.data.issuu.createdAt);
-    infoSection.querySelector(".date-posted").textContent = 
-      `Uploaded on ${date.toLocaleString()}`;
+    infoSection.querySelector(
+      ".date-posted"
+    ).textContent = `Uploaded on ${date.toLocaleString()}`;
   } catch (error) {
     console.error("Validation error:", error);
     showError("Failed to load PDF information");
@@ -273,7 +354,11 @@ function setupButtons() {
   };
 
   deleteBtn.onclick = async () => {
-    if (!confirm("Are you sure you want to delete this PDF from both S3 and Issuu?")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this PDF from both S3 and Issuu?"
+      )
+    ) {
       return;
     }
 
@@ -306,7 +391,11 @@ function setupButtons() {
       // Remove issuu.slug from URL params but keep the other params
       const params = new URLSearchParams(window.location.search);
       params.delete("issuu.slug");
-      window.history.replaceState({}, "", `${window.location.pathname}?${params}`);
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}?${params}`
+      );
       window.location.reload();
     } catch (error) {
       console.error("Delete error:", error);

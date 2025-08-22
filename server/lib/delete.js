@@ -11,7 +11,9 @@ async function deleteFromS3(filename) {
   });
 
   await s3.send(command);
-  console.log(`Deleted ${filename} from S3 bucket ${process.env.AWS_BUCKET_NAME}`);
+  console.log(
+    `Deleted ${filename} from S3 bucket ${process.env.AWS_BUCKET_NAME}`
+  );
 }
 
 async function deleteFromIssuu(issuuSlug) {
@@ -35,7 +37,7 @@ async function deleteFromIssuu(issuuSlug) {
 
 async function deletePDF(req, res) {
   try {
-    const { auction_id, 'issuu.slug': issuuSlug } = req.query;
+    const { auction_id, "issuu.slug": issuuSlug } = req.query;
 
     if (!auction_id || !issuuSlug) {
       return res.status(400).json({
@@ -43,7 +45,7 @@ async function deletePDF(req, res) {
         error: "Both auction_id and issuu.slug are required",
       });
     }
-    
+
     const filename = `${auction_id}.pdf`;
 
     const results = {
@@ -95,4 +97,20 @@ async function deletePDF(req, res) {
   }
 }
 
-module.exports = deletePDF;
+async function deleteOnlyS3(req, res) {
+  try {
+    const { auction_id } = req.body;
+
+    const response = await deleteFromS3(`${auction_id}.pdf`);
+
+    console.log(response);
+
+    res
+      .status(500)
+      .json({ success: true, message: `File ${auction_id}.pdf deleted` });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+module.exports = { deletePDF, deleteOnlyS3 };

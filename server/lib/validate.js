@@ -46,9 +46,9 @@ async function validate(req, res) {
     // Check Issuu
     try {
       const response = await fetch(
-        `https://api.issuu.com/v2/publications/${issuuSlug}`,
+        `https://api.issuu.com/v2/publications/fdnlwtvoyek/fullscreen`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${process.env.ISSUU_TOKEN}`,
@@ -56,15 +56,18 @@ async function validate(req, res) {
         }
       );
 
+      const issuuData = await response.json();
+
+      console.log(issuuData.url);
+
       if (!response.ok) {
         throw new Error("Publication not found in Issuu");
       }
 
-      const issuuData = await response.json();
       
       result.issuu = {
         exists: true,
-        url: issuuData.publicLocation,
+        url: issuuData.url,
         title: issuuData.title,
         description: issuuData.description,
         createdAt: issuuData.created,
